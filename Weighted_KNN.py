@@ -36,7 +36,6 @@ def weighted_regression(input, dataSet, k):
     sqdiff = diff**2
     squareDist = sqdiff.sum(axis=1)
     dist = squareDist**0.5
-    #对所有distance取倒后归一化拿到权重,asset去重
     sortedDistIndex = np.argsort(dist)
     # print(sortedDistIndex)
     dist = [1/d for d in dist]

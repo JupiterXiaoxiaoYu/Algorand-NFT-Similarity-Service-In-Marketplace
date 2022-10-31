@@ -1,6 +1,10 @@
+
+import time
+import pandas as pd
 import NFTdata_collection
 import Weighted_KNN
 import RandomForest
+import asyncio
 
 salesdata = NFTdata_collection.export_csv_for_ml()
 
@@ -18,10 +22,14 @@ def confirm_asset_id():
         print('Wrong asset id or number')
 
 
-def get_n_nearest_asset(n, asset_data, asset_id ):
+async def get_n_nearest_asset(n, asset_data):
     sales_dataset = NFTdata_collection.export_csv_for_ml()
-    sales_assets, knn_predicted_price_sales, sales_weights = Weighted_KNN.weighted_regression(asset_data,sales_dataset,n)
     listing_dataset = NFTdata_collection.expory_csv_for_listing()
+    if listing_dataset.shape[1] != 31:
+        print('Active listing data is updating, please wait')
+    while listing_dataset.shape[1] != 31:
+        listing_dataset = NFTdata_collection.expory_csv_for_listing()
+    sales_assets, knn_predicted_price_sales, sales_weights = Weighted_KNN.weighted_regression(asset_data,sales_dataset,n)
     listing_assets, knn_predicted_price_listing, listing_weights = Weighted_KNN.weighted_regression(asset_data,listing_dataset,n)
     print(f'Got {n} similar assets\' ids of previous sales:\n{sales_assets}')
     print(f'Predicted price of query asset through these {n} sales data (Weighted_KNN):  {knn_predicted_price_sales} Algo')
@@ -44,7 +52,7 @@ def initialization():
 
 if __name__ == "__main__":
     # RandomForest.all_train()
-    initialization()
+    # initialization()
 
     while True:
         # print(asset_data)
@@ -52,9 +60,9 @@ if __name__ == "__main__":
             asset_data, asset_id, number = confirm_asset_id()
             print(f'===============Query asset id {asset_id} for {number} similar sales and listings================')
             RandomForest.predict_price_accurate_from_previous_sales(asset_data)
-            get_n_nearest_asset(number, asset_data, asset_id )
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(get_n_nearest_asset(number, asset_data))
             print('===========================================================================================')
-
         except Exception as e:
             print(f'Try Again: {e}')
 
