@@ -52,7 +52,7 @@ def initialization():
 
 if __name__ == "__main__":
     # RandomForest.all_train()
-    # initialization()
+    initialization()
 
     while True:
         # print(asset_data)
