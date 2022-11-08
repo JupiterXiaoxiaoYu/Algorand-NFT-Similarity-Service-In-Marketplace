@@ -2,6 +2,9 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 dep_var = 'salesMicroAlgoAmount'
 
+columns_needed = ['combat', 'constitution', 'luck',
+       'plunder']
+
 def gaussian(dist, sigma = 10.0):
     """ Input a distance and return it`s weight"""
     weight = np.exp(-dist**2/(2*sigma**2))
@@ -27,8 +30,11 @@ def weighted_regression(input, dataSet, k):
     k = int(k)
     data = dataSet
     for col in list(dataSet.columns):
-        if col not in list(input.columns):
+        if col not in columns_needed:
             dataSet = dataSet.drop([col],axis=1)
+    for col in list(input.columns):
+        if col not in columns_needed:
+            input = input.drop([col],axis=1)
     preprocess(dataSet)
     preprocess(input)
     dataSize = dataSet.shape[0]
@@ -38,7 +44,9 @@ def weighted_regression(input, dataSet, k):
     dist = squareDist**0.5
     sortedDistIndex = np.argsort(dist)
     # print(sortedDistIndex)
-    dist = [1/d for d in dist]
+    # print(dist[dist==0])
+    # print(sortedDistIndex)
+    dist = [1/d if d!=0 else 1 for d in dist]
     dist = MaxMinNormalization((dist))
  
     asset_ids = []
